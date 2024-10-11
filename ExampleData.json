@@ -1,0 +1,7 @@
+{
+    "blacklist": [
+        "cmd.exe",
+        1234,
+        "calc.exe"
+    ]
+}
