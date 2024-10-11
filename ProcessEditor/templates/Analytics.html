@@ -1,0 +1,105 @@
+
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<h1 class="my-4">Process Analytics</h1>
+
+{% if anomalies %}
+    {% for anomaly in anomalies %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>{{ anomaly.title }}</h4>
+            </div>
+            <div class="card-body">
+                {% if anomaly.type == 'process' %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Process Name</th>
+                                <th>PID</th>
+                                <th>CPU (%)</th>
+                                <th>Memory (MB)</th>
+                                <th>Start Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proc in anomaly.processes %}
+                                <tr>
+                                    <td>{{ proc.name }}</td>
+                                    <td>{{ proc.pid }}</td>
+                                    <td>{{ proc.cpu_percent | default('N/A') }}</td>
+                                    <td>{{ (proc.memory_info.rss / (1024*1024)) | round(2) if proc.memory_info else 'N/A' }}</td>
+                                    <td>{{ proc.create_time | timestamp_to_datetime }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif anomaly.type == 'frequent' %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Process Name</th>
+                                <th>Launch Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proc in anomaly.processes %}
+                                <tr>
+                                    <td>{{ proc.name }}</td>
+                                    <td>{{ proc.count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% elif anomaly.type == 'details' %}
+                    <p>{{ anomaly.details }}</p>
+                {% elif anomaly.type == 'blocked_processes' %}
+                    <p>{{ anomaly.details }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No anomalies detected.</p>
+{% endif %}
+
+<h2 class="my-4">Charts</h2>
+<canvas id="cpuChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Fetch data for the chart
+    fetch('{{ url_for() }}')
+        .then(response => response.json())
+        .then(data => {
+            const labels = data.map(proc => proc.name);
+            const cpuData = data.map(proc => proc.cpu_percent);
+
+            const ctx = document.getElementById('cpuChart').getContext('2d');
+            const cpuChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'CPU Usage (%)',
+                        data: cpuData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        });
+</script>
+{% endblock %}

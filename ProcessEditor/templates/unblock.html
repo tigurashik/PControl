@@ -1,0 +1,36 @@
+
+{% extends "base.html" %}
+
+{% block title %}Разблокировка процессов{% endblock %}
+
+{% block content %}
+<h1 class="my-4">Заблокированные процессы</h1>
+{% if blocked_processes %}
+    <div class="row">
+        {% for bp in blocked_processes %}
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% if bp.process_name %}
+                        <h5 class="card-title">{{ bp.process_name }}</h5>
+                    {% else %}
+                        <h5 class="card-title">Процесс с PID {{ bp.pid }}</h5>
+                    {% endif %}
+                    {% if bp.pid %}
+                        <p class="card-text">PID: {{ bp.pid }}</p>
+                    {% endif %}
+                    <!-- Форма для отправки POST запроса на разблокировку -->
+                    <form action="{{ url_for('unblock_process') }}" method="post">
+                        <input type="hidden" name="process_name" value="{{ bp.process_name or '' }}">
+                        <input type="hidden" name="pid" value="{{ bp.pid or '' }}">
+                        <button type="submit" class="btn btn-success">Разблокировать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>Нет заблокированных процессов.</p>
+{% endif %}
+{% endblock %}

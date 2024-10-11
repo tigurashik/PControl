@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}История процессов{% endblock %}
+
+{% block content %}
+<h1 class="my-4">История процессов</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Название процесса</th>
+            <th>Статус</th>
+            <th>Время</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for process in processes %}
+        <tr>
+            <td>{{ process.process_name }}</td>
+            <td>{{ process.status }}</td>
+            <td>{{ process.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

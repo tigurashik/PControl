@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Список процессов{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="my-4">Текущие процессы</h1>
+    <ul class="list-group">
+      {% for process in processes %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="card-title">{{ process['name'] }}</h5>
+              <p class="card-text">PID(s): {{ process['pids'] | join(', ') }}</p>
+              <p class="card-text">
+                Количество активностей:
+                {% if process['name'] in activities %}
+                  {{ activities[process['name']] | length }}
+                {% else %}
+                  0
+                {% endif %}
+              </p>
+            </div>
+            <div>
+              {% if process['name'] in activities %}
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    История активностей
+                  </button>
+                  <ul class="dropdown-menu">
+                    {% for activity in activities[process['name']] %}
+                      <li><a class="dropdown-item">{{ activity.timestamp }} - {{ activity.status }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+              <a href="{{ url_for('block_process', process_name=process['name']) }}" class="btn btn-danger">Блокировать</a>
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}
